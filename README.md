@@ -9,7 +9,7 @@ BUILD INSTRUCTIONS?
 Specific sources are separated by branches and each version is tagged with it's corresponding number. First, you should
 clone the project:
 
-	$ git clone git@github.com:bq/aquaris-E6.git
+	$ git clone git@github.com:bq/aquaris-E10.git
 
 After it, choose the version you would like to build:
 
