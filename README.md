@@ -13,11 +13,22 @@ clone the project:
 
 After it, choose the version you would like to build:
 
-	$ cd aquaris-E10
-	$ git checkout aquaris-E10
+*Aquaris E10 wifi*
+
+        $ cd aquaris-E10
+        $ git checkout aquaris-E10-wifi
+
+*Aquaris E10 3g*
+
+        $ cd aquaris-E10/
+        $ git checkout aquaris-E10-3g
 
 
-Finally, build the kernel:
+Finally, build the kernel according the next table of product names:
 
-	$ ./makeMtk -t kaito n k
+| device                                                                                | product                                                               |
+| --------------------------|-------------------------|
+| bq aquaris E10 wifi                              | kaito_wifi                                      |
+| bq aquaris E10 3g      | kaito                     |
 
+        $ ./makeMtk -t {product} n k
