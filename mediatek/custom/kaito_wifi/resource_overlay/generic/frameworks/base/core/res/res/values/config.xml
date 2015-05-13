@@ -72,5 +72,5 @@
         <item>"41,1"</item>
     </string-array>
 
-
+     <integer name="config_multiuserMaximumUsers">8</integer>
 </resources>

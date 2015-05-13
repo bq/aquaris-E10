@@ -344,6 +344,11 @@ void usb_phy_poweron(void){
     USBPHY_SET8(0x6c, 0x2E);
     USBPHY_SET8(0x6d, 0x3E);
 
+    #ifdef KAITO_PROJECT
+    USBPHY_SET8(0x18, 0xF0);
+    printk("usb_phy_poweron usb read phy(0x18):0x%x\n", USBPHY_READ8(0X18));
+    #endif
+
     printk("usb power on success\n");
 }
 
@@ -556,8 +561,13 @@ void usb_phy_recover(void){
 		#endif
 		
     hs_slew_rate_cal();
-   
-   	printk("usb recovery success\n");
+
+    #ifdef KAITO_PROJECT
+    USBPHY_SET8(0x18, 0xF0);
+    printk("usb_phy_recover usb read phy(0x18):0x%x\n", USBPHY_READ8(0X18));
+    #endif
+
+   printk("usb recovery success\n");
     return;
 }
 

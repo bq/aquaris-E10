@@ -1310,6 +1310,40 @@ static int __devexit AW2013_i2c_remove(struct i2c_client *client)
 	return 0;
 }
 
+#if 1
+static ssize_t aw2013_write(struct kobject *kobj,
+			struct bin_attribute *attr,
+			char *buf, loff_t off, size_t count)
+{
+	printk("======== aw2013_write:hwctl_led_off ========\n");
+	hwctl_led_off();
+    
+	return count;
+}
+
+static ssize_t aw2013_read(struct kobject *kobj,
+			struct bin_attribute *attr, 
+			char *buf, loff_t off, size_t count)
+{
+	printk("======== aw2013_read!!!!! ========\n");
+	int i=100;
+	while(i>0)
+	{
+    	mdelay(100);
+    	i--;
+	}
+	return count;
+}
+static struct bin_attribute aw2013_attr = {
+	.attr = {
+		.name = "aw2013led",
+		.mode = S_IRUGO | S_IWUSR,
+	},
+	.size = 4,
+	.read = aw2013_read,
+	.write = aw2013_write,
+};
+#endif
 
 static int __init AW2013_Driver_Init(void) 
 {
@@ -1317,7 +1351,13 @@ static int __init AW2013_Driver_Init(void)
 
 
 	DBG_PRINT("********************    99999999999    ning AW2013_Driver_Init:start");
-
+#if 1
+	ret = sysfs_create_bin_file(&(module_kset->kobj), &aw2013_attr);
+	if (ret) {
+		printk(KERN_ERR "======== AW2013:Failed to create sys file ========\n");
+		return -ENOMEM;
+	}
+#endif
 //	#err
 	i2c_register_board_info(AW2013_I2C_BUS_NUM, &aw2013_i2c_hw, 1);
 		 

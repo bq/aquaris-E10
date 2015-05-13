@@ -31,11 +31,11 @@ on post-fs-data
 
     insmod /system/lib/modules/mtk_wmt_detect.ko
 
-    chmod 777 /dev/i2c_smartpa
+    chmod 770 /dev/i2c_smartpa
     chown system system /dev/i2c_smartpa
     chmod 777 system/bin/climax
 
-    chmod 777 /dev/i2c_smartpa_r
+    chmod 770 /dev/i2c_smartpa_r
     chown system system /dev/i2c_smartpa_r
     
 # Create char device file for WMT, GPS, BT, FM, WIFI

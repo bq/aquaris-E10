@@ -76,7 +76,6 @@
 int Enable_BATDRV_LOG = BAT_LOG_CRTI;
 //static struct proc_dir_entry *proc_entry;
 char proc_bat_data[32];  
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// Smart Battery Structure
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1185,7 +1184,22 @@ static ssize_t store_Charging_CallState(struct device *dev,struct device_attribu
     return size;
 }
 static DEVICE_ATTR(Charging_CallState, 0664, show_Charging_CallState, store_Charging_CallState);
-
+///////////////////////////////////////////////////////////////////////////////////////////
+//// Create File For EM : battery_level
+///////////////////////////////////////////////////////////////////////////////////////////
+static ssize_t show_FG_Battery_Percentage(struct device *dev,struct device_attribute *attr, char *buf)
+{
+    int ret_value=8888;
+    ret_value = battery_meter_get_battery_percentage();    
+    battery_xlog_printk(BAT_LOG_CRTI, "[EM] FG_Battery_CurrentConsumption :20 %d/10 mA\n", ret_value);
+    return sprintf(buf, "%u\n",ret_value);
+}
+static ssize_t store_FG_Battery_Percentage(struct device *dev,struct device_attribute *attr, const char *buf, size_t size)
+{
+    battery_xlog_printk(BAT_LOG_CRTI, "[EM] Not Support Write Function\n");    
+    return size;
+}
+static DEVICE_ATTR(FG_Battery_Percentage, 0664, show_FG_Battery_Percentage, store_FG_Battery_Percentage);
 static void mt_battery_update_EM(struct battery_data *bat_data)
 {
 	bat_data->BAT_CAPACITY = BMT_status.UI_SOC;
@@ -1385,6 +1399,31 @@ static void mt_battery_Sync_UI_Percentage_to_Real(void)
 	}
 }
 
+/*static int write_battery_level(int value)
+{
+   struct file *fd;
+    char *path = "/data/bat_level";
+    fd = filp_open(path, O_WRONLY | O_CREAT, 0755);
+	battery_xlog_printk(BAT_LOG_CRTI, "write %d to %s", value, path);
+    if (IS_ERR(fd)) {
+	battery_xlog_printk(BAT_LOG_CRTI, "IS_ERR");
+	
+	if( fd!= NULL){
+        filp_close(fd, NULL);
+	}
+        return -33;
+    }
+	battery_xlog_printk(BAT_LOG_CRTI, "flip_open success");
+        char buffer[5];
+	memset(buffer, '\0', 5);
+        sprintf(buffer, "%d", value);
+	battery_xlog_printk(BAT_LOG_CRTI, "write %s(%d) to %s",buffer, value, path);
+	fd->f_op->llseek(fd, 0, SEEK_SET);
+        fd->f_op->write(fd, (char *)buffer, strlen(buffer)+1, &fd->f_pos);
+        filp_close(fd, NULL);
+        return 0;//amt == -1 ? -errno : 0;
+}*/
+
 static void battery_update(struct battery_data *bat_data)
 {
     struct power_supply *bat_psy = &bat_data->psy;
@@ -1443,7 +1482,7 @@ static void battery_update(struct battery_data *bat_data)
     }
 
 	battery_xlog_printk(BAT_LOG_CRTI, "UI_SOC=(%d), resetBatteryMeter=(%d)\n", BMT_status.UI_SOC,resetBatteryMeter);	
-
+//write_battery_level( BMT_status.UI_SOC);
 	// set RTC SOC to 1 to avoid SOC jump in charger boot.
 	if (BMT_status.UI_SOC <= 1) {
 		set_rtc_spare_fg_value(1);
@@ -2877,6 +2916,7 @@ static int battery_probe(struct platform_device *dev)
 	    ret_device_file = device_create_file(&(dev->dev), &dev_attr_FG_Battery_CurrentConsumption);
 	    ret_device_file = device_create_file(&(dev->dev), &dev_attr_FG_SW_CoulombCounter);
 	    ret_device_file = device_create_file(&(dev->dev), &dev_attr_Charging_CallState);
+	    ret_device_file = device_create_file(&(dev->dev), &dev_attr_FG_Battery_Percentage);
 	}
 	
 	//battery_meter_initial();	//move to mt_battery_GetBatteryData() to decrease booting time
