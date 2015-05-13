@@ -21,8 +21,8 @@
 #define REGFLAG_DELAY 0XFD
 #define REGFLAG_END_OF_TABLE 0xFE // END OF REGISTERS MARKER
 
-#define LVDS_LCM_VCC        GPIO119 //GPIO_LCM_LVDS_PWR_EN //GPIO_LCM_LVDS_PWR_EN //GPIO119
-#define LVDS_BL_EN        GPIO116 //GPIO116
+#define LVDS_LCM_VCC        (GPIO119|0x80000000) //GPIO_LCM_LVDS_PWR_EN //GPIO_LCM_LVDS_PWR_EN //GPIO119
+#define LVDS_BL_EN        (GPIO116|0x80000000) //GPIO116
 
 // ---------------------------------------------------------------------------
 //  Local Variables

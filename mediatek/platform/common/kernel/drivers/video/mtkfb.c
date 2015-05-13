@@ -41,6 +41,7 @@
 #include "mtkfb_info.h"
 #include "ddp_ovl.h"
 #include "disp_drv_platform.h"
+#include "m4u_priv.h"
 #include <linux/aee.h>
 // Fence Sync Object
 #if defined (MTK_FB_SYNC_SUPPORT)
@@ -2738,6 +2739,9 @@ static int mtkfb_probe(struct device *dev)
         decouple_addr = fbdev->fb_pa_base + DISP_GetFBRamSize() + DAL_GetLayerSize();
         // Copy lk logo buffer to decouple buffer
 		mtkfb_fb_565_to_888((void*)fbdev->fb_va_base);
+        msleep(5);  
+        m4u_dma_cache_flush_all();
+        printk("[DDP]m4u_dma_cache_flush_all in mtkfb_probe \n");  
         printk("fb_pa_base=0x%08x, fb_pa=0x%08x, decouple_addr=0x%08x\n", fbdev->fb_pa_base, fb_pa, decouple_addr);
 #endif
 #ifdef MTKFB_FPGA_ONLY
@@ -2791,6 +2795,9 @@ static int mtkfb_probe(struct device *dev)
     /********************************************/
 
     mtkfb_fb_565_to_8888(fbi);
+    msleep(5);
+    m4u_dma_cache_flush_all();
+    printk("[DDP]m4u_dma_cache_flush_all in mtkfb_probe \n");
 
     /********************************************/
     MSG(INFO, "MTK framebuffer initialized vram=%lu\n", fbdev->fb_size_in_byte);

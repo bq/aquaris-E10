@@ -153,6 +153,12 @@
 #include <utils/Log.h>
 #endif
 
+#ifdef USING_TFA9890_EXTAMP
+extern "C" {
+#include "tfa9890.h"
+}  
+#endif
+
 //#define MTK_DIGITAL_MIC_SUPPORT
 /*****************************************************************************
 *                          C O N S T A N T S
@@ -1384,7 +1390,35 @@ int AudioFtm::PhoneMic_SpkLR_Loopback(char echoflag)
     }
     return true;
 }
+#ifdef USING_TFA9890_EXTAMP
+int AudioFtm::nxp_Spk_Calibration(int spk, float* flag)
+{
+    int value = 0;
 
+    mAudioResourceManager->EnableAudioClock(AudioResourceManagerInterface::CLOCK_AUD_AFE, true);
+    mAudioResourceManager->EnableAudioClock(AudioResourceManagerInterface::CLOCK_AUD_ANA, true);
+	
+	mAudioDigitalInstance->SetMemIfEnable(AudioDigitalType::I2S_OUT_2, true);
+
+	mAudioDigitalInstance->Set2ndI2SOutAttribute(44100);
+	mAudioDigitalInstance->Set2ndI2SOutEnable(true);
+	mAudioDigitalInstance->SetAfeEnable(true);
+
+	//add for tfa9890 calibration
+	 tfa9890_cali(spk,44100,flag);
+
+	mAudioDigitalInstance->SetMemIfEnable(AudioDigitalType::I2S_OUT_2, false);
+
+	//mAudioDigitalInstance->Set2ndI2SOutAttribute(44100);
+	mAudioDigitalInstance->Set2ndI2SOutEnable(false);
+	mAudioDigitalInstance->SetAfeEnable(false);
+	
+	mAudioResourceManager->EnableAudioClock(AudioResourceManagerInterface::CLOCK_AUD_AFE, false);
+        mAudioResourceManager->EnableAudioClock(AudioResourceManagerInterface::CLOCK_AUD_ANA, false);
+
+    return 0;
+}
+#endif
 int AudioFtm::HeadsetMic_EarphoneLR_Loopback(char bEnable, char bHeadsetMic)
 {
     if (bEnable)

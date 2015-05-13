@@ -33,6 +33,9 @@
 #include "ddp_reg.h"
 #include "ddp_wdma.h"
 #include "ddp_hal.h"
+#include "ddp_debug.h"
+#include "disp_drv_platform.h"
+#include "m4u_priv.h"
 
 #define DISP_INDEX_OFFSET 0
 
@@ -151,6 +154,9 @@ int WDMAConfig(unsigned idx,
     
     ASSERT((WDMA_INPUT_FORMAT_ARGB == inputFormat) ||
            (WDMA_INPUT_FORMAT_YUV444 == inputFormat));    
+
+    m4u_dma_cache_flush_all(); 
+    printk("[DDP]m4u_dma_cache_flush_all in wdma config\n"); 
 
     // should use OVL alpha instead of sw config
     useSpecifiedAlpha = 0;

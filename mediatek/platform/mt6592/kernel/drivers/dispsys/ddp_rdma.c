@@ -32,6 +32,8 @@
 #include "ddp_rdma.h"
 #include "ddp_hal.h"
 #include "ddp_debug.h"
+#include "disp_drv_platform.h"
+#include "m4u_priv.h"
 
 #ifndef ASSERT
 //#define ASSERT(expr) do {printk("ASSERT error func=%s, line=%d\n", __FUNC__, __LINE__);} while (!(expr))
@@ -155,9 +157,9 @@ int RDMAConfig(unsigned idx,
     unsigned int fps = 60;
     unsigned int blank_overhead = 115;	  // it is 1.15, need to divide 100 later
     unsigned int rdma_fifo_width = 16;	  // in unit of byte
-    unsigned int ultra_low_time = 4;      // in unit of us
-    unsigned int pre_ultra_low_time = 6;  // in unit of us
-    unsigned int pre_ultra_high_time = 7; // in unit of us
+    unsigned int ultra_low_time = 6;      // in unit of us
+    unsigned int pre_ultra_low_time = 8;  // in unit of us
+    unsigned int pre_ultra_high_time = 9; // in unit of us
     unsigned int consume_levels_per_usec;
     unsigned int ultra_low_level;
     unsigned int pre_ultra_low_level;
@@ -165,6 +167,10 @@ int RDMAConfig(unsigned idx,
     unsigned int ultra_high_ofs;
     unsigned int pre_ultra_low_ofs;
     unsigned int pre_ultra_high_ofs;
+
+    m4u_dma_cache_flush_all(); 
+    printk("[DDP]m4u_dma_cache_flush_all in rdma config\n");
+
     if (!DISP_IsDecoupleMode()) {
     	if(gUltraLevel==0)
     	{

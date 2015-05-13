@@ -1539,6 +1539,7 @@ void AudioMTKStreamOut::dokeyRouting(uint32_t new_device)
                 int OuputPreDevice = 0 , OutPutNewDevice = 0;
                 OuputPreDevice = mAudioDigitalControl->DlPolicyByDevice(current_device);
                 OutPutNewDevice = mAudioDigitalControl->DlPolicyByDevice(new_device);
+		mAudioResourceManager->StopOutputDevice();
                 TurnOffAfeDigital(OuputPreDevice, false);
                 TurnOnAfeDigital(OutPutNewDevice);
             }

@@ -199,6 +199,8 @@ static DEFINE_MUTEX(fwupgrade_mutex);
 atomic_t    upgrading;
 #endif /* CONFIG_SUPPORT_FTS_CTP_UPG */
 
+extern bool upmu_get_pchr_chrdet(void);
+
 
 int g_v_magnify_x =TPD_VELOCITY_CUSTOM_X;
 int g_v_magnify_y =TPD_VELOCITY_CUSTOM_Y;
@@ -1435,7 +1437,8 @@ static void check_gesture(int gesture_id)
 				//input_report_key(tpd->dev, KEY_U, 0);
 				input_report_key(tpd->dev, KEY_POWER, 0);
 				input_sync(tpd->dev);
-                custom_vibration_enable(50);
+                if(!upmu_get_pchr_chrdet())
+                  custom_vibration_enable(50);
 			}
 			break;
 		case GESTURE_O:

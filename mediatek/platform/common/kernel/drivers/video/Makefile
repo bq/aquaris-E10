@@ -17,6 +17,7 @@ obj-$(CONFIG_MTK_FB) += fbconfig_kdebug.o
 ccflags-y += -I$(MTK_PATH_SOURCE)/drivers/video/  		\
 			 -I$(MTK_PATH_PLATFORM)/drivers/video/  	\
 			 -I$(MTK_PATH_PLATFORM)/drivers/dispsys/ 	\
+             -I$(MTK_PATH_PLATFORM)/drivers/m4u/ \
 			 -I$(MTK_PATH_PLATFORM)/core/include/mach/ 	\
 			 -I$(MTK_PATH_SOURCE)/drivers/sync/
 

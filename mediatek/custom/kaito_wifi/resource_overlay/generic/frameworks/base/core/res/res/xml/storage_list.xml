@@ -47,9 +47,9 @@
     		 android:primary="false" />
 
 
-<storage android:mountPoint="/storage/usbotg"
+<!--  <storage android:mountPoint="/storage/usbotg"
     		 android:storageDescription="@string/storage_external_usb"
     		 android:removable="true"
-    		 android:primary="false" />
+    		 android:primary="false" /> -->
 
 </StorageList>

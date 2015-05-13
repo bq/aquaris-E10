@@ -983,6 +983,7 @@ on charger
 
 on property:vold.decrypt=trigger_reset_main
     write /sys/class/leds/lcd-backlight/brightness  0
+    write /sys/module/aw2013led  1
     class_reset main
 
 on property:vold.decrypt=trigger_load_persist_props
