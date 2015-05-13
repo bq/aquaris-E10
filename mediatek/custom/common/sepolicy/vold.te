@@ -225,3 +225,13 @@ allow vold self:capability setgid;
 allow vold self:capability setuid;
 allow vold self:capability sys_resource;
 allow vold cgroup:dir add_name;
+
+#ntfs 
+allow vold unlabeled:filesystem unmount;
+allow vold unlabeled:filesystem getattr;
+allow vold tmpfs:lnk_file create;
+allow vold fuse_device:chr_file getattr;
+allow vold unlabeled:filesystem mount;
+allow vold self:capability setuid;
+allow vold self:capability setgid;
+allow unlabeled unlabeled:filesystem associate;

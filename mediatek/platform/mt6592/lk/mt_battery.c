@@ -26,7 +26,7 @@
  ****************************************************************************/
 #define BATTERY_LOWVOL_THRESOLD             3450
 #ifdef KAITO_PROJECT
-#define BATTERY_TEMP_THRESOLD               50
+#define BATTERY_TEMP_THRESOLD               45
 #else
 #define BATTERY_TEMP_THRESOLD               61//50
 #endif

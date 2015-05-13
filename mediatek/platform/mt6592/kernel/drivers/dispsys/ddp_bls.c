@@ -124,7 +124,7 @@ void disp_onConfig_bls(DISP_AAL_PARAM *param)
     {
 #ifdef MTK_AAL_SUPPORT
         /*wangli_20140808*/
-        mt_pwm_disable(PWM1, 0);
+        // Delete for KAITO-973 */mt_pwm_disable(PWM1, 0);
 #else
         DISP_REG_SET(DISP_REG_BLS_PWM_DUTY, 0);
         if (regVal & 0x10000)

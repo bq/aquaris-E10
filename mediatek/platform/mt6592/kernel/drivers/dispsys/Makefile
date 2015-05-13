@@ -3,7 +3,9 @@
 ccflags-y += -I$(MTK_PATH_SOURCE)/drivers/video/ \
              -I$(MTK_PATH_PLATFORM)/../../common/kernel/drivers/video/ \
              -I$(MTK_PATH_SOURCE)/../platform/mt6592/kernel/drivers/video \
-             -I$(MTK_PATH_SOURCE)/../platform/mt6592/kernel/drivers/dispsys/slt_addp
+             -I$(MTK_PATH_SOURCE)/../platform/mt6592/kernel/drivers/dispsys/slt_addp \
+             -I$(MTK_PATH_PLATFORM)/drivers/m4u/
+             
 obj-y += ddp_slt.o
 obj-y += ddp_drv.o
 obj-y += ddp_ovl.o

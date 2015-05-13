@@ -2859,9 +2859,10 @@ int mt_enable_clock(enum cg_clk_id id, char *name)
 #ifdef CLK_LOG_TOP
     clk_info("[%s]: id=%d, names=%s\n", __func__, id, name);
 #else
-    if (id == MT_CG_DISP0_SMI_COMMON)
-        clk_dbg("[%s]: id=%d, names=%s\n", __func__, id, name);
+//if (id == MT_CG_DISP0_SMI_COMMON) 
+// clk_dbg("[%s]: id=%d, names=%s\n", __func__, id, name); //注释掉 
 #endif
+	clk_dbg("20150204 add by mtk [%s]: id=%d, names=%s\n", __func__, id, name); //add by mtk 
 
     clkmgr_lock(flags);
     err = clk_enable_internal(clk, name);
@@ -2890,9 +2891,11 @@ int mt_disable_clock(enum cg_clk_id id, char *name)
 #ifdef CLK_LOG_TOP
     clk_info("[%s]: id=%d, names=%s\n", __func__, id, name);
 #else
-    if (id == MT_CG_DISP0_SMI_COMMON)
-        clk_dbg("[%s]: id=%d, names=%s\n", __func__, id, name);
+//if (id == MT_CG_DISP0_SMI_COMMON) 
+// clk_dbg("[%s]: id=%d, names=%s\n", __func__, id, name); //注释掉 
 #endif
+if((id >= MT_CG_PERI_PWM1)&&(id <= MT_CG_PERI_PWM)) 
+	clk_dbg("20150204 add by mtk [%s]: id=%d, names=%s\n", __func__, id, name); //add by mtk 
 
     clkmgr_lock(flags);
     err = clk_disable_internal(clk, name);

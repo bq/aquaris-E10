@@ -615,7 +615,7 @@ void spm_dpidle_after_wfi(void)
  * slow idle part
  ************************************************/
 static unsigned int slidle_condition_mask[NR_GRPS] = {
-    0x00f00800, //PERI0:
+    0x00fe07c1,//0x00f00800, //PERI0:
     0x00000000, //INFRA:
     0x00000000, //TOPCK:
     0x00000000, //DISP0:

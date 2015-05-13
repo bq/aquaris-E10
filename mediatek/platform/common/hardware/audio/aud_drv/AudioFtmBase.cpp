@@ -61,6 +61,9 @@ int AudioFtmBase::LouderSPKOCTest(char left_channel, char right_channel) { retur
 int AudioFtmBase::PhoneMic_Receiver_Loopback(char echoflag) { return true; }
 int AudioFtmBase::PhoneMic_EarphoneLR_Loopback(char echoflag) { return true; }
 int AudioFtmBase::PhoneMic_SpkLR_Loopback(char echoflag) { return true; }
+#ifdef USING_TFA9890_EXTAMP
+int AudioFtmBase::nxp_Spk_Calibration(int spk,float* flag) { return true; }
+#endif
 int AudioFtmBase::HeadsetMic_EarphoneLR_Loopback(char bEnable, char bHeadsetMic) { return true; }
 int AudioFtmBase::HeadsetMic_SpkLR_Loopback(char echoflag) { return true; }
 

@@ -200,6 +200,9 @@ class AudioFtm : public AudioFtmBase
         int PhoneMic_Receiver_Loopback(char echoflag);
         int PhoneMic_EarphoneLR_Loopback(char echoflag);
         int PhoneMic_SpkLR_Loopback(char echoflag);
+#ifdef USING_TFA9890_EXTAMP
+	int nxp_Spk_Calibration(int spk,float* flag);
+#endif
         int HeadsetMic_EarphoneLR_Loopback(char bEnable, char bHeadsetMic);
         int HeadsetMic_SpkLR_Loopback(char echoflag);
 

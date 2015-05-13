@@ -32,6 +32,8 @@
 #include "ddp_hal.h"
 #include "ddp_drv.h"
 #include "ddp_debug.h"
+#include "disp_drv_platform.h"
+#include "m4u_priv.h"
 
 enum OVL_COLOR_SPACE {
     OVL_COLOR_SPACE_RGB = 0,
@@ -264,7 +266,8 @@ int OVLLayerConfig(unsigned int layer,
     {
         printk("[DDP], config AEE layer! addr=0x%x \n", addr);
     }
-    
+    m4u_dma_cache_flush_all();
+    printk("[DDP]m4u_dma_cache_flush_all in ovl config\n");
     if(fmt==OVL_INPUT_FORMAT_ABGR8888  ||
        fmt==OVL_INPUT_FORMAT_PABGR8888 ||
        fmt==OVL_INPUT_FORMAT_xBGR8888 ||
