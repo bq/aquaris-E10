@@ -42,6 +42,8 @@
 #define POST_CHARGING_TIME	 30 * 60 // 30mins
 #define FULL_CHECK_TIMES		6
 
+//#define CUST_CAPACITY_OCV2CV_TRANSFORM
+
  // ============================================================ //
  //global variable
  // ============================================================ //
@@ -673,7 +675,11 @@ PMU_STATUS BAT_BatteryFullAction(void)
 
 		BMT_status.bat_in_recharging_state = KAL_TRUE;
         BMT_status.bat_charging_state = CHR_CC;
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+		battery_meter_reset(KAL_TRUE);
+#else
 		battery_meter_reset();
+#endif
     }        
            
   

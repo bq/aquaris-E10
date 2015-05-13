@@ -35,6 +35,13 @@
 // ============================================================ //
 static DEFINE_MUTEX(FGADC_mutex);
 
+//#define CUST_CAPACITY_OCV2CV_TRANSFORM
+
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+#define STEP_OF_QMAX 54		/* 54 mAh */
+#define CV_CURRENT 6000		/* 600mA */
+static kal_int32 g_currentfactor = 100;
+#endif
 int Enable_FGADC_LOG = 1;
 
 // ============================================================ //
@@ -49,7 +56,7 @@ kal_bool gFG_Is_Charging = KAL_FALSE;
 kal_int32 g_auxadc_solution = 0;
 U32 g_spm_timer = 600;
 bool bat_spm_timeout = false;
-U32 _g_bat_sleep_total_time = 0;
+U32 _g_bat_sleep_total_time = 5400;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //// PMIC AUXADC Related Variable
@@ -1248,6 +1255,110 @@ void fgauge_construct_table_by_temp(void)
 #endif
 }
 
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+/*
+	ZCV table is created by 600mA loading.
+	Here we calculate average current and get a factor based on 600mA.
+*/
+void fgauge_get_current_factor(void)
+{
+#if defined(CONFIG_POWER_EXT)
+#else
+	kal_uint32 i;
+	static kal_int32 init_current = KAL_TRUE;
+	static kal_int32 inst_current, avg_current;
+	static kal_int32 battCurrentBuffer[TEMP_AVERAGE_SIZE];
+	static kal_int32 current_sum;
+	static kal_uint8 tempcurrentIndex;
+
+	if (KAL_TRUE == gFG_Is_Charging) {
+		init_current = KAL_TRUE;
+		g_currentfactor = 100;
+		bm_print(BM_LOG_CRTI, "[fgauge_get_current_factor] Charging!!\r\n");
+		return;
+	}
+
+	inst_current = gFG_current;
+
+	if (init_current == KAL_TRUE) {
+		for (i = 0; i < TEMP_AVERAGE_SIZE; i++)
+			battCurrentBuffer[i] = inst_current;
+
+		current_sum = inst_current * TEMP_AVERAGE_SIZE;
+		init_current = KAL_FALSE;
+	}
+
+	/* current sliding window */
+	current_sum -= battCurrentBuffer[tempcurrentIndex];
+	current_sum += inst_current;
+	battCurrentBuffer[tempcurrentIndex] = inst_current;
+	avg_current = (current_sum) / TEMP_AVERAGE_SIZE;
+
+	g_currentfactor = avg_current * 100 / CV_CURRENT;	/* calculate factor by 600ma */
+
+	bm_print(BM_LOG_CRTI, "[fgauge_get_current_factor] %d,%d,%d,%d\r\n",
+		 inst_current, avg_current, g_currentfactor, gFG_Is_Charging);
+
+	tempcurrentIndex = (tempcurrentIndex + 1) % TEMP_AVERAGE_SIZE;
+#endif
+}
+
+/*
+	ZCV table has battery OCV-to-resistance information.
+	Based on a given discharging current value, we can get a new estimated Qmax.
+	Qmax is defined as OCV -I*R < power off voltage.
+	Default power off voltage is 3400mV.
+*/
+
+kal_int32 fgauge_get_Q_max_high_current_by_current(kal_int32 i_current, kal_int16 val_temp)
+{
+	kal_int32 ret_Q_max = 0;
+	kal_int32 iIndex = 0, saddles = 0;
+	kal_int32 OCV_temp = 0, Rbat_temp = 0, V_drop = 0;
+	R_PROFILE_STRUC_P p_profile_r;
+	BATTERY_PROFILE_STRUC_P p_profile_battery;
+	kal_int32 threshold = SYSTEM_OFF_VOLTAGE;
+	/* for Qmax initialization */
+	ret_Q_max = fgauge_get_Q_max_high_current(val_temp);
+
+	/* get Rbat and OCV table of the current temperature */
+	p_profile_r = fgauge_get_profile_r_table(TEMPERATURE_T);
+	p_profile_battery = fgauge_get_profile(TEMPERATURE_T);
+	if (p_profile_r == NULL || p_profile_battery == NULL) {
+		bm_print(BM_LOG_CRTI, "get R-Table profile/OCV table profile : fail !\r\n");
+		return ret_Q_max;
+	}
+
+	if (0 == p_profile_r->resistance || 0 == p_profile_battery->voltage) {
+		bm_print(BM_LOG_CRTI, "get R-Table profile/OCV table profile : not ready !\r\n");
+		return ret_Q_max;
+	}
+
+	saddles = fgauge_get_saddles();
+
+	/* get Qmax in current temperature (>3.4) */
+	for (iIndex = 0; iIndex < saddles - 1; iIndex++) {
+		OCV_temp = (p_profile_battery + iIndex)->voltage;
+		Rbat_temp = (p_profile_r + iIndex)->resistance;
+		V_drop = (i_current * Rbat_temp) / 10000;
+
+		if (OCV_temp - V_drop < threshold) {
+			if (iIndex <= 1)
+				ret_Q_max = STEP_OF_QMAX;
+			else
+				ret_Q_max = (iIndex - 1) * STEP_OF_QMAX;
+			break;
+		}
+	}
+
+	bm_print(BM_LOG_CRTI, "[fgauge_get_Q_max_by_current] %d,%d,%d,%d,%d\r\n",
+		 i_current, iIndex, OCV_temp, Rbat_temp, ret_Q_max);
+
+	return ret_Q_max;
+}
+
+#endif
+
 void fg_qmax_update_for_aging(void)
 {
 #if defined(CONFIG_POWER_EXT)
@@ -1492,6 +1603,10 @@ void oam_run(void)
 
     // Reconstruct table if temp changed;
     fgauge_construct_table_by_temp();
+
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+	fgauge_get_current_factor();
+#endif
 		
     vol_bat = 15; //set avg times
     ret = battery_meter_ctrl(BATTERY_METER_CMD_GET_ADC_V_BAT_SENSE, &vol_bat);
@@ -2530,6 +2645,59 @@ kal_int32 battery_meter_get_charger_voltage(void)
     return val;
 }
 
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+kal_int32 battery_meter_get_battery_soc(void)
+{
+#if defined(SOC_BY_SW_FG)
+	#if (OAM_D5 == 1)
+        return (100-oam_d_5);
+	#else
+        return (100-oam_d_2);
+	#endif
+#else
+	return 50;
+#endif
+}
+#endif
+
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+/* Here we compensate D1 by a factor from Qmax with loading. */
+kal_int32 battery_meter_trans_battery_percentage(kal_int32 d_val)
+{
+	kal_int32 d_val_before = 0;
+	kal_int32 temp_val = 0;
+	kal_int32 C_0mA = 0;
+	kal_int32 C_600mA = 0;
+	kal_int32 C_current = 0;
+	kal_int32 i_avg_current = 0;
+
+	d_val_before = d_val;
+	temp_val = battery_meter_get_battery_temperature();
+	C_0mA = fgauge_get_Q_max(temp_val);
+
+	/* discharging and current > 600ma */
+	i_avg_current = g_currentfactor * CV_CURRENT / 100;
+	if (KAL_FALSE == gFG_Is_Charging && g_currentfactor > 100) {
+		C_600mA = fgauge_get_Q_max_high_current(temp_val);
+		C_current = fgauge_get_Q_max_high_current_by_current(i_avg_current, temp_val);
+		if (C_current < C_600mA)
+			C_600mA = C_current;
+	} else
+		C_600mA = fgauge_get_Q_max_high_current(temp_val);
+
+	if (C_0mA > C_600mA)
+		d_val = d_val + (((C_0mA - C_600mA) * (d_val)) / C_600mA);
+
+	if (d_val > 100)
+		d_val = 100;
+
+	bm_print(BM_LOG_CRTI, "[battery_meter_trans_battery_percentage] %d,%d,%d,%d,%d,%d\r\n",
+		 temp_val, C_0mA, C_600mA, d_val_before, d_val, g_currentfactor);
+
+	return d_val;
+}
+#endif
+
 kal_int32 battery_meter_get_battery_percentage(void)
 {
 #if defined(CONFIG_POWER_EXT)
@@ -2557,11 +2725,19 @@ kal_int32 battery_meter_get_battery_percentage(void)
     
     #if defined(SOC_BY_SW_FG)
     oam_run();    
+    #ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+        #if (OAM_D5 == 1)
+            return (100-battery_meter_trans_battery_percentage(oam_d_5));
+        #else
+            return (100-battery_meter_trans_battery_percentage(oam_d_2));
+        #endif
+    #else
         #if (OAM_D5 == 1)
             return (100-oam_d_5);
         #else
             return (100-oam_d_2);
         #endif
+    #endif
     #endif
 
 #endif
@@ -2657,12 +2833,24 @@ void reset_parameter_dod_full(kal_uint32 ui_percentage)
     #endif
 }
 
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+kal_int32 battery_meter_reset(kal_bool bUI_SOC)
+#else
 kal_int32 battery_meter_reset(void)
+#endif
 {
 #if defined(CONFIG_POWER_EXT)
     return 0;
 #else
     kal_uint32 ui_percentage = bat_get_ui_percentage();
+
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+	if (KAL_FALSE == bUI_SOC) {
+		ui_percentage = battery_meter_get_battery_soc();
+		bm_print(BM_LOG_FULL, "[CUST_CAPACITY_OCV2CV_TRANSFORM]Use Battery SOC: %d\n",
+			 ui_percentage);
+	}
+#endif
 
     if(bat_is_charging_full() == KAL_TRUE) // charge full
     {
@@ -2977,8 +3165,8 @@ static ssize_t show_FG_HW_version(struct device *dev,struct device_attribute *at
     IMM_GetOneChannelValue(13,adcdata,&hw_ver_adc);
     hw_ver_adc = hw_ver_adc * 1500/4096;
     bm_print(BM_LOG_CRTI, "[FG] show_FG_HW_version : %d\n", hw_ver_adc);
-    //LiuHuojun 20140113 zplus PCB板检测ADC XP 0.7V为1.1版, 其他为1.0,
-    //V1.1板未改电阻时检测为1.1V左右,V1.0 ADC置空,目前检测电压为0.5V,可能存在板差异
+    //LiuHuojun 20140113 zplus PCB\B0\E5\BC\EC\B2\E2ADC XP 0.7V为1.1\B0\E6, \C6\E4\CB\FB为1.0,
+    //V1.1\B0\E5未\B8牡\E7\D7\E8时\BC\EC\B2\E2为1.1V\D7\F3\D3\D2,V1.0 ADC\D6每\D5,目前\BC\EC\B2\E2\B5\E7压为0.5V,\BF\C9\C4艽\E6\D4诎\E5\B2\EE\D2\EC
     if(hw_ver_adc < 500)  
     {
         return sprintf(buf, "%s\n", "PCB Ver: 1.0");
@@ -3059,6 +3247,8 @@ static int battery_meter_suspend(struct platform_device *dev, pm_message_t state
 	if (_g_bat_sleep_total_time < g_spm_timer) {
 		return 0;
 	}
+	
+	_g_bat_sleep_total_time = 0;
 	battery_meter_ctrl(BATTERY_METER_CMD_GET_HW_OCV, &g_hw_ocv_before_sleep);
 #endif	
 
@@ -3103,9 +3293,9 @@ static int battery_meter_resume(struct platform_device *dev)
         
     	if(_g_bat_sleep_total_time > 3600)	//1hr
     	{
-    		if(hw_ocv_after_sleep != g_hw_ocv_before_sleep)
+    		if(hw_ocv_after_sleep < g_hw_ocv_before_sleep)
     		{
-    			 gFG_DOD0 = fgauge_read_d_by_v(hw_ocv_after_sleep); 
+    			 oam_d0 = fgauge_read_d_by_v(hw_ocv_after_sleep); 
     			 oam_v_ocv_2 = oam_v_ocv_1 = hw_ocv_after_sleep;
     			 oam_car_1 = 0;
     			 oam_car_2 = 0;
@@ -3122,7 +3312,7 @@ static int battery_meter_resume(struct platform_device *dev)
     			oam_car_2 = oam_car_2 + (20* (rtc_time_after_sleep.tv_sec - g_rtc_time_before_sleep.tv_sec)/3600); //0.1mAh	
     	}	
         bm_print(BM_LOG_CRTI, "sleeptime=(%d)s, be_ocv=(%d), af_ocv=(%d), D0=(%d), car1=(%d), car2=(%d) \n",
-    		rtc_time_after_sleep.tv_sec - g_rtc_time_before_sleep.tv_sec, g_hw_ocv_before_sleep, hw_ocv_after_sleep,gFG_DOD0, oam_car_1, oam_car_2);
+    		rtc_time_after_sleep.tv_sec - g_rtc_time_before_sleep.tv_sec, g_hw_ocv_before_sleep, hw_ocv_after_sleep, oam_d0, oam_car_1, oam_car_2);
     }
 #endif		
     bm_print(BM_LOG_CRTI, "[battery_meter_resume]\n");

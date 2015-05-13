@@ -70,6 +70,8 @@
 #include "mach/mtk_rtc.h"
 
 
+//#define CUST_CAPACITY_OCV2CV_TRANSFORM
+
 ////////////////////////////////////////////////////////////////////////////////
 // Battery Logging Entry
 ////////////////////////////////////////////////////////////////////////////////
@@ -1465,7 +1467,11 @@ static void battery_update(struct battery_data *bat_data)
 
 	if(resetBatteryMeter == KAL_TRUE)
   	{
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+		battery_meter_reset(KAL_TRUE);
+#else
 		battery_meter_reset();
+#endif
   	}
     else
     {
@@ -1482,7 +1488,14 @@ static void battery_update(struct battery_data *bat_data)
     }
 
 	battery_xlog_printk(BAT_LOG_CRTI, "UI_SOC=(%d), resetBatteryMeter=(%d)\n", BMT_status.UI_SOC,resetBatteryMeter);	
-//write_battery_level( BMT_status.UI_SOC);
+
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+	/* We store capacity before loading compenstation in RTC */
+	if (battery_meter_get_battery_soc() <= 1)
+		set_rtc_spare_fg_value(1);
+	else
+		set_rtc_spare_fg_value(battery_meter_get_battery_soc());	/*use battery_soc */
+#else
 	// set RTC SOC to 1 to avoid SOC jump in charger boot.
 	if (BMT_status.UI_SOC <= 1) {
 		set_rtc_spare_fg_value(1);
@@ -1490,6 +1503,8 @@ static void battery_update(struct battery_data *bat_data)
 	else {
 		set_rtc_spare_fg_value(BMT_status.UI_SOC);
 	}
+#endif
+	battery_xlog_printk(BAT_LOG_FULL, "RTC_SOC=(%d)\n", get_rtc_spare_fg_value());
 	
 	mt_battery_update_EM(bat_data);
 		
@@ -1834,12 +1849,14 @@ void mt_battery_GetBatteryData(void)
 	BMT_status.temperatureR = temperatureR;
 	BMT_status.SOC = SOC;	
 	BMT_status.ZCV = ZCV;
-
+	
+#ifndef CUST_CAPACITY_OCV2CV_TRANSFORM
 	if(BMT_status.charger_exist == KAL_FALSE)
 	{
 		if(BMT_status.SOC > previous_SOC && previous_SOC >= 0)
 			BMT_status.SOC = previous_SOC;
 	}
+#endif
 
 	previous_SOC = BMT_status.SOC;
 	
@@ -2452,7 +2469,11 @@ int bat_thread_kthread(void *x)
         if( chr_wake_up_bat == KAL_TRUE && g_smartbook_update != 1)	// for charger plug in/ out
         {
                 g_smartbook_update = 0;
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+           	battery_meter_reset(KAL_FALSE);
+#else
            	battery_meter_reset();
+#endif
 			chr_wake_up_bat = KAL_FALSE;
 			            
             battery_xlog_printk(BAT_LOG_CRTI, "[BATTERY] Charger plug in/out, Call battery_meter_reset. (%d)\n", BMT_status.UI_SOC);

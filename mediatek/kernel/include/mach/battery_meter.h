@@ -39,7 +39,12 @@ extern kal_int32 battery_meter_get_battery_temperature(void);
 extern kal_int32 battery_meter_get_charger_voltage(void);
 extern kal_int32 battery_meter_get_battery_percentage(void);
 extern kal_int32 battery_meter_initial(void);
+#ifdef CUST_CAPACITY_OCV2CV_TRANSFORM
+extern kal_int32 battery_meter_reset(kal_bool bUI_SOC);
+#else
 extern kal_int32 battery_meter_reset(void);
+#endif
+extern kal_int32 battery_meter_get_battery_soc(void);
 extern kal_int32 battery_meter_sync(kal_int32 bat_i_sense_offset);                      
 
 extern kal_int32 battery_meter_get_battery_zcv(void);
