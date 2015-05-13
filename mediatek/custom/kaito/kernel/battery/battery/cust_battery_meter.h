@@ -41,15 +41,18 @@
 #define FG_METER_RESISTANCE 	0
 
 /* Qmax for battery  */
-#define Q_MAX_POS_50	8660
-#define Q_MAX_POS_25	8862
-#define Q_MAX_POS_0	    8891
-#define Q_MAX_NEG_10	8939
+//For KAITO-1157, all 8 macros value below minus 767, modified by kolery 20150302
+//767 =8838 - (8838 * 80% + 10011 /10 ), the datas 8838, 80% and 10011 are from the mtk logs
+#define Q_MAX_POS_50	7893 // (=8660 - 767)
+#define Q_MAX_POS_25	8095
+#define Q_MAX_POS_0	8124
+#define Q_MAX_NEG_10	8172
 
-#define Q_MAX_POS_50_H_CURRENT	8609
-#define Q_MAX_POS_25_H_CURRENT	8814
-#define Q_MAX_POS_0_H_CURRENT	8770
-#define Q_MAX_NEG_10_H_CURRENT	8640
+#define Q_MAX_POS_50_H_CURRENT	7842 // (=8609 - 767)
+#define Q_MAX_POS_25_H_CURRENT	8047
+#define Q_MAX_POS_0_H_CURRENT	8003
+#define Q_MAX_NEG_10_H_CURRENT	7873
+//end
 
 
 /* Discharge Percentage */
