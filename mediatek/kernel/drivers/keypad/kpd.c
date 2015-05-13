@@ -63,6 +63,7 @@ unsigned int mt_eint_get_status(unsigned int eint_num);
 int cur_hall_eint_state = EINT_PIN_FARAWAY;
 int cur_hall_light_level = 1;
 int g_hall_switch_value =0;
+int hall_enable = 1;
 
 static DEFINE_MUTEX(hall_switch_mutex);
 static DECLARE_WAIT_QUEUE_HEAD(hall_switch_thread_wq);
@@ -331,28 +332,30 @@ static void kpd_slide_handler(unsigned long data)
 	//input_report_switch(kpd_input_dev, SW_LID, slid);
 	printk("hall report QWERTY = %s\n", slid ? "far away" : "closed");
 	printk("hall cur_hall_light_level = %d\n", cur_hall_light_level);
-	if((0==slid)&&(0 != cur_hall_light_level)&&(0==g_is_calling))
-	{
-		input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 1);
-		input_sync(kpd_input_dev);
+	printk("kaito hall hall_enable = %d\n", hall_enable);
+		if((0==slid)&&(0 != cur_hall_light_level)&&(0==g_is_calling)&&hall_enable)
+		{
+			input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 1);
+			input_sync(kpd_input_dev);
 
-		udelay(10);
-		input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 0);
-		input_sync(kpd_input_dev);
-		cur_hall_eint_state =  EINT_PIN_CLOSE;
-	}
-	else if((1==slid)&&(0 == cur_hall_light_level)&&(0==g_is_calling))//if((cur_hall_eint_state == EINT_PIN_FARAWAY )&&(0 != cur_hall_light_level))
-	{
-		input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 1);
-		input_sync(kpd_input_dev);
-		udelay(10);
-		input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 0);
-		input_sync(kpd_input_dev);
-		cur_hall_eint_state =  EINT_PIN_FARAWAY;
-	}
-	/* for detecting the return to old_state */
-	mt_eint_set_polarity(CUST_EINT_MHALL_NUM, old_state);
-	mt_eint_unmask(CUST_EINT_MHALL_NUM);
+			udelay(10);
+			input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 0);
+			input_sync(kpd_input_dev);
+			cur_hall_eint_state =  EINT_PIN_CLOSE;
+		}
+		else if((1==slid)&&(0 == cur_hall_light_level)&&(0==g_is_calling)&&hall_enable)//if((cur_hall_eint_state == EINT_PIN_FARAWAY )&&(0 != cur_hall_light_level))
+		{
+			input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 1);
+			input_sync(kpd_input_dev);
+			udelay(10);
+			input_report_key(kpd_input_dev, KPD_PWRKEY_MAP, 0);
+			input_sync(kpd_input_dev);
+			cur_hall_eint_state =  EINT_PIN_FARAWAY;
+		}
+		/* for detecting the return to old_state */
+		mt_eint_set_polarity(CUST_EINT_MHALL_NUM, old_state);
+		mt_eint_unmask(CUST_EINT_MHALL_NUM);
+
 }
 
 static void kpd_slide_eint_handler(void)
@@ -963,8 +966,26 @@ static ssize_t show_hall_status(struct device_driver *ddri, char *buf)
 	return size;
 }
 static DRIVER_ATTR(hallstatus, S_IRUGO, show_hall_status, NULL);
+static ssize_t store_hall_enable(struct device_driver *ddri, const char *buf, size_t count)
+{
+	char *pvalue = NULL;
+	if(buf != NULL && count != 0)
+	{
+		printk("[hx8527]store_hall_enable buf is %s and count is %d \n",buf,count);
+		hall_enable = simple_strtoul(buf,&pvalue,16);
+		printk("[hx8527]store_hall_enable : %s\n",hall_enable==0 ? "Disable" : "Enable");
+	}
+	return count;
+}
+
+static ssize_t show_hall_enable(struct device_driver *ddri, char *buf)
+{
+	return sprintf(buf,"hall_enable:%s \n",hall_enable==0 ? "Disable" : "Enable");
+}
+static DRIVER_ATTR(hall_enable,	0664,	show_hall_enable,	store_hall_enable);
 static struct driver_attribute *hall_attr_list[] = {
 	&driver_attr_hallstatus,
+	&driver_attr_hall_enable,
 };
 static int hall_create_attr(struct device_driver *driver) 
 {

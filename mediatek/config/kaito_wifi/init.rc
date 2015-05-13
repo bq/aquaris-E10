@@ -519,6 +519,10 @@ on post-fs-data
     #kpd
     chown radio radio /sys/devices/platform/mtk-kpd/driver/kpd_call_state
 
+    # add by ckt litb 2014-12-10
+    chown system  system  /sys/devices/platform/mtk-kpd/driver/hall_enable
+    chmod 0664 /sys/devices/platform/mtk-kpd/driver/hall_enable
+
     #Charging Battery
     chown radio radio /sys/devices/platform/battery/Charging_CallState
 

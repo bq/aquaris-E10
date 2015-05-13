@@ -99,7 +99,7 @@ if(facing == 1) /*front sensor*/
         SCENE_AS_DEFAULT_SCENE(
             ITEM_AS_DEFAULT_("640x480"), 
             ITEM_AS_VALUES_(
-                "176x144",      "480x320",      "640x480", 
+                "176x144",      "480x320",      "720x480", 
                 "864x480",      "1280x720", 
             )
         ), 

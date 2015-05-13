@@ -9,7 +9,7 @@ CKT_AUTO_ADD_GLOBAL_DEFINE_BY_VALUE =
 PROJ_NAME = KAITO01A
 CUST_NAME = BQ
 SOFTCODE = S10A
-BASEVERNO =203
+BASEVERNO =207
 #############################
 #会用他设置ro.product.model
 CKT_PRODUCT_MODEL=CKT_$(strip $(PROJ_NAME) )

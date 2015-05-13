@@ -78,14 +78,14 @@ const NVRAM_LENS_PARA_STRUCT FM50AF_LENS_PARA_DEFAULT_VALUE =
     // AF NVRAM
     {
         // -------- AF ------------
-        {110,  // i4Offset
-         15,  // i4NormalNum
-         15,  // i4MacroNum
+        {150,  // i4Offset
+         17,  // i4NormalNum
+         17,  // i4MacroNum
          0,  // i4InfIdxOffset
          0,  // i4MacroIdxOffset
         {
-                       0,  20,  40,  60,  80, 100, 120, 140, 200, 260,
-                     340, 420, 500, 550, 600,   0,   0,   0,   0,   0,
+                       0,  15,  30,  45,  60,  80, 100, 130, 160, 200,
+                     240, 280, 320, 370, 430, 480, 540,   0,   0,   0,
                        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 
           },
@@ -118,15 +118,16 @@ const NVRAM_LENS_PARA_STRUCT FM50AF_LENS_PARA_DEFAULT_VALUE =
          },
          
          // -------- ZSD AF ------------
-        {110,  // i4Offset
-         15,  // i4NormalNum
-         15,  // i4MacroNum
+        {150,  // i4Offset
+         17,  // i4NormalNum
+         17,  // i4MacroNum
           0, // i4InfIdxOffset
           0, //i4MacroIdxOffset            
           {
-                       0,  20,  40,  60,  80, 100, 120, 140, 200, 260,
-                     340, 420, 500, 550, 600,   0,   0,   0,   0,   0,
-             0,    0,     0,    0,    0,    0,    0,    0,    0,    0
+                       0,  15,  30,  45,  60,  80, 100, 130, 160, 200,
+                     240, 280, 320, 370, 430, 480, 540,   0,   0,   0,
+                       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+
           },
           15, // i4THRES_MAIN;
           10, // i4THRES_SUB;            
@@ -152,15 +153,16 @@ const NVRAM_LENS_PARA_STRUCT FM50AF_LENS_PARA_DEFAULT_VALUE =
         12  // i4FV_1ST_STABLE_CNT
         }, 
           // -------- VAFC ------------
-        {110,  // i4Offset
-         15,  // i4NormalNum
-         15,  // i4MacroNum
+        {150,  // i4Offset
+         17,  // i4NormalNum
+         17,  // i4MacroNum
            0, // i4InfIdxOffset
            0, //i4MacroIdxOffset          
            {
-                       0,  20,  40,  60,  80, 100, 120, 140, 200, 260,
-                     340, 420, 500, 550, 600,   0,   0,   0,   0,   0,
-				 0,    0,	  0,	0,	  0,	0,	  0,	0,	  0,	0
+                       0,  15,  30,  45,  60,  80, 100, 130, 160, 200,
+                     240, 280, 320, 370, 430, 480, 540,   0,   0,   0,
+                       0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+
            },
         10,  // i4THRES_MAIN
         5,  // i4THRES_SUB

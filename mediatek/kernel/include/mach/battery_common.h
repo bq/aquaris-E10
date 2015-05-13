@@ -11,7 +11,7 @@
  *  BATTERY VOLTAGE
  ****************************************************************************/
 #define PRE_CHARGE_VOLTAGE                  3200
-#define SYSTEM_OFF_VOLTAGE                  3400  
+#define SYSTEM_OFF_VOLTAGE                  3450  
 #define CONSTANT_CURRENT_CHARGE_VOLTAGE     4100  
 #define CONSTANT_VOLTAGE_CHARGE_VOLTAGE     4200  
 #define CV_DROPDOWN_VOLTAGE                 4000

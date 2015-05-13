@@ -184,7 +184,7 @@ const NVRAM_CAMERA_3A_STRUCT CAMERA_3A_NVRAM_DEFAULT_VALUE =
             TRUE,    // bEnableCaptureThres
             TRUE,    // bEnableVideoThres
             TRUE,    // bEnableStrobeThres
-            54,    // u4AETarget
+            50,    // u4AETarget
             0,    // u4StrobeAETarget
             50,    // u4InitIndex
             4,    // u4BackLightWeight
