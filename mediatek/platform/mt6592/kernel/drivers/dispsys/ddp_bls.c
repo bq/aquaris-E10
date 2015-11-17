@@ -311,7 +311,9 @@ void disp_bls_update_pwm_lut(void)
     DISP_REG_SET(DISP_REG_BLS_LUMINANCE_255, g_pwm_lut.entry[PWM_LUT_ENTRY-1]);
     //DISP_REG_SET(DISP_REG_BLS_EN, regValue);
 }
-
+#ifdef MTK_AAL_SUPPORT   
+static int firstRun = 1;
+#endif
 void disp_bls_init(unsigned int srcWidth, unsigned int srcHeight)
 {
     struct cust_mt65xx_led *cust_led_list = get_cust_led_list();
@@ -335,7 +337,15 @@ void disp_bls_init(unsigned int srcWidth, unsigned int srcHeight)
             BLS_MSG("disp_bls_init : PWM config data (%d,%d)\n", config_data->clock_source, config_data->div);
         }
     }
-        
+#ifdef MTK_AAL_SUPPORT/*MTK20150511*/   
+    if((firstRun == 1) || (firstRun == 2))
+		    firstRun++; 
+	  else 	
+	  {
+		    mt_backlight_set_pwm(PWM1, 0, CLK_DIV1,&config_data);  
+		    BLS_MSG("diable backlight in disp_bls_init \n");
+		}
+#endif       
     BLS_DBG("disp_bls_init : srcWidth = %d, srcHeight = %d\n", srcWidth, srcHeight);
     BLS_MSG("disp_bls_init : BLS_EN=0x%x, PWM_DUTY=%d, PWM_DUTY_RD=%d, CG=0x%x, %d, %d\n", 
         DISP_REG_GET(DISP_REG_BLS_EN),

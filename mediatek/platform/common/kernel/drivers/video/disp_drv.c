@@ -446,6 +446,15 @@ static int _DISP_DecoupleWriteKThread(void *data) {
     			write_mem_running = 1;
     			_DISP_ConfigMemWriteDatapath(&dirty_flag);
     			_DISP_WaitMemWriteDone();
+			#if 1 //for KAITO-1000 by kolery 20150424
+			for(i = 0 ; i < DISP_CB_MAXCNT ; i += 1) 
+			{
+				if((NULL != g_CB_Array.checkupdate_cb[i]) && g_CB_Array.checkupdate_cb[i](dirty)) 
+					{ 
+						g_CB_Array.config_cb[i](dirty);
+					} 
+			} 
+			#endif //end
     		}
     	}
 	}
@@ -555,7 +564,8 @@ static void DISP_ConfigMemReadDatapath (disp_path_config_dirty *dirty_flag) {
         rdma_captured_layer = -1;
 	}
 	disp_path_config_rdma(&config);
-
+	
+       #if 0 //for KAITO-1000 by kolery 20150424
 	if (dirty_flag->aal_dirty) {
 		MMProfileLog(MTKFB_MMP_Events.ConfigAAL, MMProfileFlagStart);
 		//GetUpdateMutex();
@@ -569,6 +579,8 @@ static void DISP_ConfigMemReadDatapath (disp_path_config_dirty *dirty_flag) {
 		}
 		MMProfileLog(MTKFB_MMP_Events.ConfigAAL, MMProfileFlagEnd);
 	}
+	#endif //end
+	
 	if ((lcm_params->type == LCM_TYPE_DBI) ||
 			((lcm_params->type == LCM_TYPE_DSI) && (lcm_params->dsi.mode == CMD_MODE))){
 		DISP_STATUS ret = _DISP_ConfigUpdateScreen(0, 0, DISP_GetScreenWidth(), DISP_GetScreenHeight());
