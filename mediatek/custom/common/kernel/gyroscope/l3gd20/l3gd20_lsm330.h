@@ -138,7 +138,8 @@
 
 // 1 rad = 180/PI degree, L3GD20_OUT_MAGNIFY = 131,
 // 180*131/PI = 7506
-#define DEGREE_TO_RAD	7506
+//#define DEGREE_TO_RAD	7506 qian.chen kaito-1201
+#define DEGREE_TO_RAD	7659
 
 #define FAC_CALI_GYRO
 

@@ -3190,6 +3190,8 @@ static void mtkfb_late_resume(struct early_suspend *h)
     printk("[FB Driver] leave late_resume\n");
 
     MSG_FUNC_LEAVE();
+
+    msleep(20);
 }
 #endif
 

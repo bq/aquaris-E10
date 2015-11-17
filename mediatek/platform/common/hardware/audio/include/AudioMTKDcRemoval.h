@@ -29,7 +29,7 @@ class DcRemove
         status_t close();
     private:
         DCRemove_Handle *mHandle;
-	signed char *p_internal_buf;
+        signed char *p_internal_buf;
         DcRemove(const DcRemove &);
         DcRemove &operator=(const DcRemove &);
         mutable Mutex  mLock;

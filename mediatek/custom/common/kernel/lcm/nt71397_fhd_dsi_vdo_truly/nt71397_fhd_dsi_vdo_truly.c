@@ -268,14 +268,14 @@ static void lcm_init(void)
 	data_array[0] = 0x00110500; // Sleep out
 	dsi_set_cmdq(data_array, 1, 1);
 	//MDELAY(150);
-	MDELAY(120);
+	MDELAY(100);
 	
 	data_array[0] = 0x00290500; // Display on
 	dsi_set_cmdq(data_array, 1, 1);
 	//MDELAY(50);
 	
 	DSI_clk_HS_mode(1);
-	MDELAY(50);
+	MDELAY(30);
 	
 }
 

@@ -363,11 +363,16 @@ static int I2C_TxData(char *txData, int length)
 // Daemon application save the data
 static int ECS_SaveData(int buf[12])
 {
+int temp;
 #if DEBUG	
 	struct i2c_client *client = this_client;  
 	struct mmc3516x_i2c_data *data = i2c_get_clientdata(client);
 #endif
 
+      // buf[4]=
+       temp = buf[4];
+       buf[4]= -buf[5];
+	buf[5]= temp;
 	mutex_lock(&sensor_data_mutex);
 	memcpy(sensor_data, buf, sizeof(sensor_data));	
 	mutex_unlock(&sensor_data_mutex);
